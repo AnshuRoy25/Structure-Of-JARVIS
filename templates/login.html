@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>JARVIS - Login</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>JARVIS</h1>
+      <h2>Login</h2>
+    </header>
+
+    <main>
+      <!-- Username input -->
+      <div>
+        <input type="text" id="username" placeholder="Username">
+      </div>
+
+      <!-- Password input -->
+      <div>
+        <input type="password" id="password" placeholder="Password">
+      </div>
+
+      <!-- Buttons for login and account creation -->
+      <div>
+        <button id="login-btn" onclick="login()">Login</button>
+        <button id="create-btn" onclick="window.location.href='/create-page'">Create Account</button>
+      </div>
+
+      <!-- Message output -->
+      <div id="message"></div>
+    </main>
+
+    <!-- Script tag for JS -->
+    <script src="{{ url_for('static', filename='login.js') }}"></script>
+
+  </body>
+
+</html>

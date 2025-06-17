@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>JARVIS - Create</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>JARVIS</h1>
+      <h2>Create Account</h2>
+    </header>
+
+    <main>
+      <!-- Username input -->
+      <div>
+        <input type="text" id="username" placeholder="Username">
+      </div>
+
+      <!-- Password input -->
+      <div>
+        <input type="password" id="password" placeholder="Password">
+      </div>
+
+      <!-- Confirm Password input -->
+      <div>
+        <input type="password" id="confirm-password" placeholder="Confirm Password">
+      </div>
+
+      <!-- Buttons for login and account creation -->
+      <div>
+        <button id="login-btn" onclick="create()">Create Account</button>
+        <button id="create-btn" onclick="window.location.href='/'">Return to Login</button>
+      </div>
+
+      <!-- Message output -->
+      <div id="message"></div>
+    </main>
+
+    <!-- Script tag for JS -->
+    <script src="{{ url_for('static', filename='create.js') }}"></script>
+
+  </body>
+  
+</html>

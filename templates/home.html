@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>JARVIS AI</title>
+  </head>
+  <body>
+
+    <!-- Top Section: Chatbot Name -->
+    <header>
+      <h1>JARVIS</h1>
+    </header>
+
+    
+
+    <!-- Bottom Section: Input + Send Button + Model Selector -->
+    <footer>
+      <input type="text" id="userinput" placeholder="Type your message...">
+      <button onclick="send()">Send</button>
+
+      <select id="modelSelector">
+        <option value="mistral:7b">Mistral</option>
+        <option>Gemma</option>
+        <option>Deepseek</option>
+      </select>
+
+      
+    </footer>
+
+    <!-- Middle Section: Chat Area -->
+    <main>
+      <div id="messages">
+        <!-- Messages between user and assistant will appear here -->
+      </div>
+    </main>
+
+
+  <script src="{{ url_for('static', filename='script.js') }}"> </script>  
+  
+
+</body>
+</html>
