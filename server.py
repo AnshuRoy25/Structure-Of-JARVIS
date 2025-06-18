@@ -1,127 +1,199 @@
-# Import necessary modules
+# --------- Imports ---------
 from flask import Flask, render_template, request, jsonify, session
 import ollama
 from pymongo import MongoClient
 from bson import ObjectId
 import bcrypt
+from datetime import datetime
+import pytz
 
-# Initialize the Flask app
+# --------- App Setup ---------
 app = Flask(__name__)
-app.secret_key = '1234'  # Secret key used for securely signing session cookies
+app.secret_key = '1234'  # Secret key for managing user sessions
 
-# ----------------------------- Database Setup -----------------------------
+# --------- MongoDB Setup ---------
+client = MongoClient('mongodb://localhost:27017/')  # Connect to MongoDB server
+db = client['jarvis_database']  # Use or create database
+user_collection = db['users']  # Collection for user credentials
+conversations_collection = db['conversations']  # Collection for chat messages
+sessions_collection = db['sessions']  # Collection for storing chat sessions
 
-# Connect to the MongoDB server and define the database and collections
-client = MongoClient('mongodb://localhost:27017/')
-db = client['jarvis_database']
-user_collection = db['users']  # Collection to store user data
-conversations_collection = db['conversations']  # Collection to store chat history
-
-# ----------------------------- Route Definitions -----------------------------
-
-# Route for login page
+# --------- Page Routes ---------
 @app.route('/')
 def login():
+    # Serve the login page
     return render_template('login.html')
 
-# Route for account creation page
 @app.route('/create-page')
 def create():
+    # Serve the create account page
     return render_template('create.html')
 
-# Route for homepage after successful login
 @app.route('/home-page')
 def home():
-    return render_template('home.html')
+    # Serve the chat interface after login
+    return render_template('home.html', username=session['user_name'])
 
-# ----------------------------- Account Creation -----------------------------
-
-# Route to handle creation of new user accounts
+# --------- Create Account ---------
 @app.route('/create-account', methods=['POST'])
 def create_account():
-    data = request.get_json()  # Get data sent from frontend as JSON
+    data = request.get_json()
     username = data.get('username')
-    password = str(data.get('password'))  # Ensure password is in string format
+    password = data.get('password')
 
-    # Hash the password using bcrypt
-    password_bytes = password.encode('utf-8')
-    hashed_password_bytes = bcrypt.hashpw(password_bytes, bcrypt.gensalt())
-    hashed_password = hashed_password_bytes.decode('utf-8')
-
-    # Check if username already exists in the database
-    check_username = user_collection.find_one({"username": username})
-
-    if check_username:
+    # Check if username already exists
+    if user_collection.find_one({"username": username}):
         return jsonify({"reply": "Username already exists"})
-    else:
-        # Store the new user's username and hashed password in the database
-        user_collection.insert_one({ "username": username, "password": hashed_password })
-        return jsonify({"reply": "Account Created Successfully"})
 
-# ----------------------------- User Login -----------------------------
+    # Hash and store the new password
+    hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    user_collection.insert_one({
+        "username": username,
+        "password": hashed_pw
+    })
 
-# Route to handle user login authentication
+    return jsonify({"reply": "Account Created Successfully"})
+
+# --------- Login Function ---------
 @app.route('/login-account', methods=['POST'])
 def login_account():
     data = request.get_json()
     username = data.get('username')
-    password = str(data.get('password'))
+    password = data.get('password')
 
-    # Find user by username
-    check_user = user_collection.find_one({"username": username})
-
-    if check_user:
-        # Encode password and stored hash to bytes
-        password_bytes = password.encode('utf-8')
-        hashed_password = check_user.get('password')
-        hashed_password_bytes = hashed_password.encode('utf-8')
-
-        # Compare entered password with stored hashed password
-        if bcrypt.checkpw(password_bytes, hashed_password_bytes):
-            session['user_id'] = str(check_user['_id'])  # Store user ID in session
+    # Find the user by username
+    user = user_collection.find_one({"username": username})
+    if user:
+        # Compare hashed passwords
+        if bcrypt.checkpw(password.encode(), user['password'].encode()):
+            session['user_id'] = str(user['_id'])  # Store user ID in session
+            session['user_name'] = user['username']  # Store username in session
             return jsonify({"reply": "Login Successful"})
-        else: 
-            return jsonify({"reply": "Invalid Password"})
-    else:
-        return jsonify({"reply": "Invalid Username"})
+        return jsonify({"reply": "Invalid Password"})
+    return jsonify({"reply": "Invalid Username"})
 
-# ----------------------------- Chat Handler -----------------------------
-
-# Route to handle user chat input and get response from Ollama model
+# --------- Chat Handler ---------
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
-    userinput = data.get('userinput')     # Message input by the user
-    modelname = data.get('modelname')     # AI model name (e.g., llama3, gemma)
-    user_id = session.get('user_id')      # Get the logged-in user ID from session
+    userinput = data.get('userinput')
+    modelname = data.get('modelname')
 
-    # Fetch previous conversations for this user from database
-    previous_conversations = list(conversations_collection.find(
-        {"user_id": ObjectId(user_id)},
+    user_id = session.get('user_id')
+    session_id = session.get('current_session_id')
+
+    # Fetch previous messages from DB to continue the conversation context
+    previous_msgs = list(conversations_collection.find(
+        {"user_id": ObjectId(user_id), "session_id": ObjectId(session_id)},
         {"_id": 0, "role": 1, "content": 1}
     ))
-    
-    # Append current user message to conversation history
-    previous_conversations.append({ "role": "user", "content": userinput })
 
-    # Get AI-generated reply from Ollama
-    response = ollama.chat(
-        model = modelname,
-        messages = previous_conversations,
-    )
+    # Add the new user message
+    previous_msgs.append({ "role": "user", "content": userinput })
 
-    reply = response['message']['content']  # Extract content from AI response
+    # Use Ollama to generate a response
+    response = ollama.chat(model=modelname, messages=previous_msgs)
+    reply = response['message']['content']
 
-    # Save both user message and AI reply in the database
+    # Store both user and assistant messages in the DB
     conversations_collection.insert_many([
-        { "user_id": ObjectId(user_id), "role": "user", "content": userinput },
-        { "user_id": ObjectId(user_id), "role": "assistant", "content": reply }
+        { "user_id": ObjectId(user_id), "session_id": ObjectId(session_id), "role": "user", "content": userinput },
+        { "user_id": ObjectId(user_id), "session_id": ObjectId(session_id), "role": "assistant", "content": reply }
     ])
 
-    # Send the AI reply back to the frontend
     return jsonify({"reply": reply})
 
-# ----------------------------- Run the App -----------------------------
+# --------- Start New Chat Session ---------
+@app.route('/newsession', methods=['POST'])
+def newsession():
+    ist_now = datetime.now(pytz.timezone('Asia/Kolkata'))
+    user_id = session.get('user_id')
 
-# Run the app in debug mode
-app.run(debug = True)
+    # Title format includes timestamp
+    title = "Chat | " + ist_now.strftime("%I:%M %p - %d %B %Y")
+
+    # Create a new session entry
+    new_session = sessions_collection.insert_one({
+        "user_id": ObjectId(user_id),
+        "title": title,
+        "created_at": ist_now
+    })
+
+    # Save current session ID in session
+    session['current_session_id'] = str(new_session.inserted_id)
+    return jsonify({
+        "reply": "New session created",
+        "session_id": str(new_session.inserted_id),
+        "title": title
+    })
+
+# --------- Onload Check for Existing Session ---------
+@app.route('/onload-check')
+def onload_check():
+    user_id = session.get('user_id')
+
+    # Get the most recent session
+    session_doc = sessions_collection.find_one(
+        {"user_id": ObjectId(user_id)},
+        sort=[("created_at", -1)]
+    )
+
+    if session_doc:
+        session['current_session_id'] = str(session_doc['_id'])
+
+        # Load all conversations for this session
+        chats = list(conversations_collection.find(
+            {"user_id": ObjectId(user_id), "session_id": ObjectId(session_doc['_id'])},
+            {"_id": 0, "role": 1, "content": 1}
+        ))
+        return jsonify({ "success": True, "conversations": chats })
+
+    # If no session, create one
+    ist_now = datetime.now(pytz.timezone('Asia/Kolkata'))
+    title = "Chat | " + ist_now.strftime("%I:%M %p - %d %B %Y")
+    new_session = sessions_collection.insert_one({
+        "user_id": ObjectId(user_id),
+        "title": title,
+        "created_at": ist_now
+    })
+    session['current_session_id'] = str(new_session.inserted_id)
+    return jsonify({ "success": False })
+
+# --------- Load All User Sessions ---------
+@app.route('/load-sessions')
+def load_sessions():
+    user_id = session.get('user_id')
+
+    # Get all sessions for the user
+    sessions_list = list(sessions_collection.find(
+        {"user_id": ObjectId(user_id)},
+        {"_id": 1, "title": 1},
+        sort=[("created_at", -1)]
+    ))
+
+    # Convert ObjectIds to string
+    for s in sessions_list:
+        s['_id'] = str(s['_id'])
+
+    return jsonify({ "sessions_list": sessions_list })
+
+# --------- Load Chats of a Selected Session ---------
+@app.route('/load-session-chats', methods=['POST'])
+def load_session_chats():
+    user_id = session.get('user_id')
+    session_id = request.get_json().get('session_id')
+
+    # Update session tracker
+    session['current_session_id'] = session_id
+
+    # Load all chats of this session
+    chats = list(conversations_collection.find(
+        {"user_id": ObjectId(user_id), "session_id": ObjectId(session_id)},
+        {"_id": 0, "role": 1, "content": 1}
+    ))
+
+    return jsonify({ "session_chats": chats })
+
+# --------- Run the Flask App ---------
+if __name__ == '__main__':
+    app.run(debug=True)
