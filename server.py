@@ -1,15 +1,26 @@
 # --------- Imports ---------
 from flask import Flask, render_template, request, jsonify, session
-import ollama
 from pymongo import MongoClient
 from bson import ObjectId
 import bcrypt
 from datetime import datetime
 import pytz
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # --------- App Setup ---------
 app = Flask(__name__)
-app.secret_key = '1234'  # Secret key for managing user sessions
+app.secret_key = os.getenv("FLASK_SECRET_KEY")  # Secret key for managing user sessions
+
+
+# --------- OpenAi Setup ---------
+ai_client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY")
+)
 
 # --------- MongoDB Setup ---------
 client = MongoClient('mongodb://localhost:27017/')  # Connect to MongoDB server
@@ -92,8 +103,15 @@ def chat():
     previous_msgs.append({ "role": "user", "content": userinput })
 
     # Use Ollama to generate a response
-    response = ollama.chat(model=modelname, messages=previous_msgs)
-    reply = response['message']['content']
+    try:
+        response = ai_client.chat.completions.create(
+            model=modelname,
+            messages=previous_msgs
+        )
+        reply = response.choices[0].message.content
+    except:
+        reply = "Sorry, Something went wrong."
+        
 
     # Store both user and assistant messages in the DB
     conversations_collection.insert_many([
