@@ -1,0 +1,6 @@
+Flask
+pymongo
+bcrypt
+python-dotenv
+openai
+pytz
