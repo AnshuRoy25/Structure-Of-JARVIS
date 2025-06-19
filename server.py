@@ -23,7 +23,7 @@ ai_client = OpenAI(
 )
 
 # --------- MongoDB Setup ---------
-client = MongoClient('mongodb://localhost:27017/')  # Connect to MongoDB server
+client = MongoClient(os.getenv("MONGODB_URI"))  # Connect to MongoDB server
 db = client['jarvis_database']  # Use or create database
 user_collection = db['users']  # Collection for user credentials
 conversations_collection = db['conversations']  # Collection for chat messages
