@@ -30,6 +30,10 @@ conversations_collection = db['conversations']  # Collection for chat messages
 sessions_collection = db['sessions']  # Collection for storing chat sessions
 
 # --------- Page Routes ---------
+@app.route('/ping')
+def ping():
+    return {"status": "ok"}, 200
+
 @app.route('/')
 def login():
     # Serve the login page
