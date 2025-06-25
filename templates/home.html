@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>JARVIS AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
 </head>
 <body>
 
@@ -67,7 +68,7 @@
             <button onclick="send()" class="send-button">Send</button>
 
             <select id="modelSelector" class="model-selector">
-                <option value="meta-llama/llama-3.3-8b-instruct:free">Llama</option>
+                <option value="meta-llama/llama-4-maverick:free">Llama</option>
                 <option value="gemma3:4b">Gemma</option>
             </select>
         </div>

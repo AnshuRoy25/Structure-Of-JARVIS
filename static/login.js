@@ -1,39 +1,82 @@
 async function login() {
+    const messages = document.getElementById('message');
+    const loginBtn = document.getElementById('login-btn');
+    
+    const credential_1 = document.getElementById('username');
+    const username = credential_1.value.trim();
+    const credential_2 = document.getElementById('password');
+    const password = credential_2.value;
 
-    const messages = document.getElementById('message')
+    // Clear previous messages
+    messages.className = '';
+    messages.innerHTML = '';
 
-    const credential_1 = document.getElementById('username')
-    const username = credential_1.value
-    const credential_2 = document.getElementById('password')
-    const password = credential_2.value
-
-    credential_1.value = ''
-    credential_2.value = ''
-
+    // Basic validation
     if (username === "" || password === "") {
-        messages.innerHTML = `Please fill in all fields`
+        showMessage("Please fill in all fields", "error");
+        return;
     }
-    else {
 
-         const response = await fetch('/login-account', {
-             method: 'POST',
-             headers: {
+    // Show loading state
+    loginBtn.disabled = true;
+    loginBtn.classList.add('loading');
+    showMessage("Logging in...", "info");
+
+    try {
+        const response = await fetch('/login-account', {
+            method: 'POST',
+            headers: {
                 'Content-Type': 'application/json',
-             },
-             body: JSON.stringify({ username:username, password: password })
-         })
+            },
+            body: JSON.stringify({ username: username, password: password })
+        });
 
-         data = await response.json()
-         
-         messages.innerHTML = `${data.reply}`
-
-         if (data.reply === "Login Successful") {
-            setTimeout(() => {
-            window.location.href = '/home-page';
-            }, 1000);
-         }
-            
+        const data = await response.json();
         
+        if (response.ok && data.reply === "Login Successful") {
+            showMessage(data.reply, "success");
+            // Clear form on success
+            credential_1.value = '';
+            credential_2.value = '';
+            
+            // Redirect to home page
+            setTimeout(() => {
+                window.location.href = '/home-page';
+            }, 1000);
+        } else {
+            showMessage(data.reply || "Login failed", "error");
+            // Clear form on error
+            credential_1.value = '';
+            credential_2.value = '';
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage("Network error. Please try again.", "error");
+        // Clear form on network error
+        credential_1.value = '';
+        credential_2.value = '';
+    } finally {
+        // Remove loading state
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading');
     }
-
 }
+
+function showMessage(message, type) {
+    const messages = document.getElementById('message');
+    messages.innerHTML = message;
+    messages.className = type;
+}
+
+// Add Enter key support
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+    });
+});
