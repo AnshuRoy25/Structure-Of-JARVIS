@@ -1,46 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JARVIS">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0d12">
+    <meta name="msapplication-navbutton-color" content="#0a0d12">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>JARVIS - Create</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='login-create.css') }}">
-  </head>
+    
+    <!-- Prevent automatic telephone number detection -->
+    <meta name="format-detection" content="telephone=no">
+</head>
 
-  <body>
+<body>
     <header>
-      <h1>JARVIS</h1>
-      <h2>Create Account</h2>
+        <h1>JARVIS</h1>
+        <h2>Create Account</h2>
     </header>
 
     <main>
-      <!-- Username input -->
-      <div>
-        <input type="text" id="username" placeholder="Username">
-      </div>
+        <!-- Username input -->
+        <div>
+            <input type="text" id="username" placeholder="Username" autocomplete="username" autocapitalize="none" spellcheck="false">
+        </div>
 
-      <!-- Password input -->
-      <div>
-        <input type="password" id="password" placeholder="Password">
-      </div>
+        <!-- Password input -->
+        <div>
+            <input type="password" id="password" placeholder="Password" autocomplete="new-password">
+        </div>
 
-      <!-- Confirm Password input -->
-      <div>
-        <input type="password" id="confirm-password" placeholder="Confirm Password">
-      </div>
+        <!-- Confirm Password input -->
+        <div>
+            <input type="password" id="confirm-password" placeholder="Confirm Password" autocomplete="new-password">
+        </div>
 
-      <!-- Buttons for login and account creation -->
-      <div>
-        <button id="login-btn" onclick="create()">Create Account</button>
-        <button id="create-btn" onclick="window.location.href='/'">Return to Login</button>
-      </div>
+        <!-- Buttons for login and account creation -->
+        <div>
+            <button id="login-btn" onclick="create()">Create Account</button>
+            <button id="create-btn" onclick="window.location.href='/'">Return to Login</button>
+        </div>
 
-      <!-- Message output -->
-      <div id="message"></div>
+        <!-- Message output -->
+        <div id="message"></div>
     </main>
 
     <!-- Script tag for JS -->
     <script src="{{ url_for('static', filename='create.js') }}"></script>
-
-  </body>
-  
+</body>
 </html>

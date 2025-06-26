@@ -1,10 +1,12 @@
 // Wait until the entire page content is loaded before executing logic
 document.addEventListener('DOMContentLoaded', async () => {
+    initializeSidebarState(); // Add this line
     await onload_check();       // Check if there's an existing session and load messages
     await load_sessions();      // Load all previous session titles in the sidebar
     setupEventListeners();     // Setup additional event listeners
 });
 
+// Setup additional event listeners
 // Setup additional event listeners
 function setupEventListeners() {
     // Allow sending message with Enter key
@@ -23,19 +25,23 @@ function setupEventListeners() {
         input.focus();
     }
 
-    // Mobile menu toggle
-    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-    const sidebar = document.querySelector('.sidebar');
-    
-    if (mobileMenuToggle && sidebar) {
-        mobileMenuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-        });
-    }
-
     // Auto-resize textarea
     if (input && input.tagName === 'TEXTAREA') {
         input.addEventListener('input', autoResizeTextarea);
+    }
+    
+    // Add mobile-specific event listeners
+    document.addEventListener('click', handleOutsideClick);
+    window.addEventListener('resize', handleResize);
+    
+    // Prevent zoom on input focus for iOS
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.style.fontSize = '16px';
+            });
+        });
     }
 }
 
@@ -423,22 +429,94 @@ function formatTimestamp(timestamp) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Close mobile sidebar when clicking outside
-document.addEventListener('click', (e) => {
-    const sidebar = document.querySelector('.sidebar');
-    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+
+// Toggle sidebar visibility
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const chatContainer = document.querySelector('.chat-container');
+    const toggleBtn = document.getElementById('sidebar-toggle');
     
-    if (sidebar && mobileMenuToggle && window.innerWidth <= 640) {
-        if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-            sidebar.classList.remove('open');
+    if (!sidebar || !chatContainer || !toggleBtn) return;
+    
+    // Toggle classes
+    sidebar.classList.toggle('open');
+    chatContainer.classList.toggle('sidebar-open');
+    toggleBtn.classList.toggle('active');
+    
+    // Store sidebar state in sessionStorage for persistence during the session
+    const isOpen = sidebar.classList.contains('open');
+    sessionStorage.setItem('sidebarOpen', isOpen.toString());
+}
+
+
+// Check sidebar state on page load
+// Check sidebar state on page load
+function initializeSidebarState() {
+    const sidebar = document.getElementById('sidebar');
+    const chatContainer = document.querySelector('.chat-container');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    
+    if (!sidebar || !chatContainer || !toggleBtn) return;
+    
+    // Get saved state from sessionStorage (defaults to closed)
+    const savedState = sessionStorage.getItem('sidebarOpen');
+    const shouldBeOpen = savedState === 'true';
+    
+    // Only apply saved state on desktop
+    if (shouldBeOpen && window.innerWidth > 768) {
+        sidebar.classList.add('open');
+        chatContainer.classList.add('sidebar-open');
+        toggleBtn.classList.add('active');
+    } else if (window.innerWidth <= 768) {
+        // On mobile, always start with sidebar closed
+        sidebar.classList.remove('open');
+        chatContainer.classList.remove('sidebar-open');
+        toggleBtn.classList.remove('active');
+    }
+}
+
+// Handle clicks outside sidebar to close it on mobile
+function handleOutsideClick(event) {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    
+    if (!sidebar || !toggleBtn) return;
+    
+    // Only handle this on mobile/tablet
+    if (window.innerWidth > 768) return;
+    
+    // Check if sidebar is open
+    if (!sidebar.classList.contains('open')) return;
+    
+    // Check if click is outside sidebar and not on toggle button
+    if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+        toggleSidebar();
+    }
+}
+
+// Handle window resize to manage sidebar state
+function handleResize() {
+    const sidebar = document.getElementById('sidebar');
+    const chatContainer = document.querySelector('.chat-container');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+    
+    if (!sidebar || !chatContainer || !toggleBtn) return;
+    
+    // If switching to desktop view and sidebar was closed, restore saved state
+    if (window.innerWidth > 768) {
+        const savedState = sessionStorage.getItem('sidebarOpen');
+        const shouldBeOpen = savedState === 'true';
+        
+        if (shouldBeOpen) {
+            sidebar.classList.add('open');
+            chatContainer.classList.add('sidebar-open');
+            toggleBtn.classList.add('active');
         }
     }
-});
-
-// Handle window resize
-window.addEventListener('resize', () => {
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar && window.innerWidth > 640) {
+    // If switching to mobile view, close sidebar
+    else {
         sidebar.classList.remove('open');
+        chatContainer.classList.remove('sidebar-open');
+        toggleBtn.classList.remove('active');
     }
-});
+}

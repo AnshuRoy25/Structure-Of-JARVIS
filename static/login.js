@@ -67,16 +67,101 @@ function showMessage(message, type) {
     const messages = document.getElementById('message');
     messages.innerHTML = message;
     messages.className = type;
+    
+    // Scroll message into view on mobile if needed
+    if (window.innerWidth <= 480) {
+        setTimeout(() => {
+            messages.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
 }
 
-// Add Enter key support
+// Enhanced mobile support
 document.addEventListener('DOMContentLoaded', function() {
     const inputs = document.querySelectorAll('input');
+    const buttons = document.querySelectorAll('button');
+    
+    // Add Enter key support
     inputs.forEach(input => {
         input.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 login();
             }
         });
+        
+        // Handle focus for better mobile experience
+        input.addEventListener('focus', function() {
+            // Slight delay to ensure virtual keyboard is shown
+            setTimeout(() => {
+                if (window.innerWidth <= 480) {
+                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
+        });
+        
+        // Prevent zoom on iOS when focusing inputs
+        input.addEventListener('touchstart', function() {
+            if (this.style.fontSize !== '16px') {
+                this.style.fontSize = '16px';
+            }
+        });
+    });
+    
+    // Enhanced touch support for buttons
+    buttons.forEach(button => {
+        // Prevent double-tap zoom on iOS
+        button.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            this.click();
+        });
+        
+        // Add haptic feedback simulation
+        button.addEventListener('touchstart', function() {
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        });
+    });
+    
+    // Handle orientation changes
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            // Recalculate viewport and scroll position
+            window.scrollTo(0, 0);
+            
+            // Ensure proper scaling
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+            }
+        }, 500);
+    });
+    
+    // Handle visual viewport changes (for when virtual keyboard appears)
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', function() {
+            const viewportHeight = window.visualViewport.height;
+            const windowHeight = window.innerHeight;
+            
+            // Adjust body height when virtual keyboard appears
+            if (viewportHeight < windowHeight * 0.75) {
+                document.body.style.height = viewportHeight + 'px';
+            } else {
+                document.body.style.height = '100vh';
+            }
+        });
+    }
+    
+    // Prevent rubber band scrolling on iOS
+    document.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    // Handle back button on mobile browsers
+    window.addEventListener('popstate', function(e) {
+        // Custom handling if needed
     });
 });

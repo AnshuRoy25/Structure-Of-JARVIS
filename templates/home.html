@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>JARVIS AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
 </head>
 <body>
@@ -52,6 +53,11 @@
 
         <!-- Chat Header -->
         <div class="chat-header">
+            <button id="sidebar-toggle" class="sidebar-toggle-btn" onclick="toggleSidebar()">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
             <h1>JARVIS</h1>
         </div>
 
@@ -64,14 +70,16 @@
 
         <!-- Chat Footer -->
         <div class="chat-footer">
-            <input type="text" id="userinput" placeholder="Type your message..." class="chat-input">
-            <button onclick="send()" class="send-button">Send</button>
-
-            <select id="modelSelector" class="model-selector">
-                <option value="mistralai/mistral-7b-instruct:free">Llama</option>
-                <option value="gemma3:4b">Gemma</option>
-            </select>
-        </div>
+    <div class="chat-input-row">
+        <input type="text" id="userinput" placeholder="Type your message..." class="chat-input">
+        <button onclick="send()" id="send-btn" class="send-button">Send</button>
+    </div>
+    
+    <select id="modelSelector" class="model-selector">
+        <option value="mistralai/mistral-7b-instruct:free">Llama</option>
+        <option value="gemma3:4b">Gemma</option>
+    </select>
+</div>
 
     </div>
 
