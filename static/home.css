@@ -52,11 +52,12 @@ body {
 }
 
 .sidebar-header h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #f8fafc;
     letter-spacing: 0.5px;
-    word-break: break-word;
+    font-style: italic;
+
 }
 
 .sidebar-menu {
@@ -282,6 +283,7 @@ body {
     font-weight: 700;
     color: #f8fafc;
     letter-spacing: 0.5px;
+    font-style: italic;
 }
 
 /* Chat Main Area */
@@ -479,10 +481,15 @@ body {
     border-radius: 8px;
     color: #f1f5f9;
     font-size: 0.9rem;
+    font-style: italic;
     cursor: pointer;
     transition: all 0.3s ease;
     outline: none;
     min-width: 150px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+
+    font-style: italic;
 }
 
 .model-selector:focus {
