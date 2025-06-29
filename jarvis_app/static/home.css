@@ -9,18 +9,32 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #0a0d12 0%, #12161c 50%, #0f1419 100%);
     color: #e4e8ed;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
+    min-height: 100dvh;
     line-height: 1.6;
+    position: relative;
+    /* FIXED: Prevent body overflow */
+    overflow: hidden;
+}
+
+/* FIXED: Add mobile viewport meta tag support */
+html {
+    /* FIXED: Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+    /* FIXED: Better mobile scrolling */
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Sidebar Styles */
 .sidebar {
     position: fixed;
-    left: -300px; /* Changed from left: 0 to left: -300px */
+    left: -300px;
     top: 0;
     width: 300px;
-    height: 100vh;
+    /* FIXED: Use min-height instead of height for mobile */
+    min-height: 100vh;
+    /* FIXED: Add max-height for mobile browsers */
+    max-height: 100vh;
     background: rgba(15, 23, 32, 0.98);
     backdrop-filter: blur(20px);
     border-right: 1px solid rgba(71, 85, 105, 0.2);
@@ -28,7 +42,12 @@ body {
     flex-direction: column;
     z-index: 1000;
     box-shadow: 4px 0 25px rgba(0, 0, 0, 0.5);
-    transition: left 0.3s ease; /* Add smooth transition */
+    transition: left 0.3s ease;
+    /* FIXED: Add overflow handling for mobile */
+    overflow-y: auto;
+    /* FIXED: Add safe area support for notched devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .sidebar.open {
@@ -41,6 +60,8 @@ body {
     height: 100%;
     padding: 1.5rem;
     overflow-x: hidden;
+    /* FIXED: Ensure content doesn't overflow on mobile */
+    min-height: 0;
 }
 
 .sidebar-header {
@@ -49,6 +70,8 @@ body {
     padding-bottom: 1.5rem;
     border-bottom: 1px solid rgba(71, 85, 105, 0.2);
     overflow: hidden;
+    /* FIXED: Prevent text overflow on small screens */
+    word-wrap: break-word;
 }
 
 .sidebar-header h2 {
@@ -57,7 +80,6 @@ body {
     color: #f8fafc;
     letter-spacing: 0.5px;
     font-style: italic;
-
 }
 
 .sidebar-menu {
@@ -65,11 +87,15 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    /* FIXED: Ensure proper flex behavior on mobile */
+    min-height: 0;
 }
 
 /* New Session Button */
 .new-session {
     margin-bottom: 2rem;
+    /* FIXED: Prevent button from being cut off */
+    flex-shrink: 0;
 }
 
 .new-session-btn {
@@ -90,6 +116,8 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    /* FIXED: Ensure button is tappable on mobile */
+    min-height: 44px;
 }
 
 .new-session-btn:hover:not(:disabled) {
@@ -121,6 +149,8 @@ body {
     min-height: 20px;
     transition: all 0.3s ease;
     opacity: 0;
+    /* FIXED: Prevent message from being cut off */
+    flex-shrink: 0;
 }
 
 .session-creation-message.show {
@@ -151,6 +181,8 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    /* FIXED: Ensure proper scrolling on mobile */
+    min-height: 0;
 }
 
 .sessions-title {
@@ -160,6 +192,8 @@ body {
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid rgba(71, 85, 105, 0.15);
+    /* FIXED: Prevent title from being cut off */
+    flex-shrink: 0;
 }
 
 .sessions-container {
@@ -168,6 +202,8 @@ body {
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: rgba(71, 85, 105, 0.4) transparent;
+    /* FIXED: Better mobile scrolling */
+    -webkit-overflow-scrolling: touch;
 }
 
 .sessions-container::-webkit-scrollbar {
@@ -207,6 +243,8 @@ body {
     text-overflow: ellipsis;
     min-width: 0;
     box-sizing: border-box;
+    /* FIXED: Ensure buttons are tappable on mobile */
+    min-height: 44px;
 }
 
 .session button:hover {
@@ -225,6 +263,8 @@ body {
     padding-top: 1.5rem;
     border-top: 1px solid rgba(71, 85, 105, 0.2);
     margin-top: auto;
+    /* FIXED: Prevent footer from being cut off */
+    flex-shrink: 0;
 }
 
 .username-display {
@@ -256,12 +296,17 @@ body {
 
 /* Chat Container */
 .chat-container {
-    margin-left: 0; /* Changed from margin-left: 300px to margin-left: 0 */
+    margin-left: 0;
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     background: rgba(12, 20, 28, 0.8);
-    transition: margin-left 0.3s ease; /* Add smooth transition */
+    transition: margin-left 0.3s ease;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    /* FIXED: Prevent container overflow */
+    overflow: hidden;
 }
 
 .chat-container.sidebar-open {
@@ -275,15 +320,25 @@ body {
     backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(71, 85, 105, 0.2);
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
-    display: flex; /* Add this */
-    align-items: center; /* Add this */
+    display: flex;
+    align-items: center;
+    /* FIXED: Prevent header from shrinking */
+    flex-shrink: 0;
+    /* FIXED: Ensure proper stacking on mobile */
+    position: relative;
+    z-index: 10;
 }
+
 .chat-header h1 {
     font-size: 2rem;
     font-weight: 700;
     color: #f8fafc;
     letter-spacing: 0.5px;
     font-style: italic;
+    /* FIXED: Prevent text overflow on small screens */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Chat Main Area */
@@ -294,6 +349,10 @@ body {
     scrollbar-width: thin;
     scrollbar-color: rgba(71, 85, 105, 0.4) transparent;
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* FIXED: Ensure proper flex behavior and height calculation */
+    min-height: 0;
+    height: 0; /* This forces flex to calculate properly */
 }
 
 .chat-main::-webkit-scrollbar {
@@ -320,6 +379,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    /* FIXED: Ensure container can grow properly */
+    min-height: min-content;
 }
 
 /* Message Styles */
@@ -327,6 +388,9 @@ body {
     display: flex;
     margin-bottom: 1rem;
     animation: fadeInUp 0.4s ease-out;
+    /* FIXED: Prevent messages from overflowing */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .message.user {
@@ -347,6 +411,9 @@ body {
     word-wrap: break-word;
     position: relative;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    /* FIXED: Better text wrapping on mobile */
+    overflow-wrap: break-word;
+    hyphens: auto;
 }
 
 /* User Messages (Right side) */
@@ -407,6 +474,8 @@ body {
 .message-text {
     font-size: 1rem;
     line-height: 1.5;
+    /* FIXED: Better text handling on mobile */
+    word-break: break-word;
 }
 
 /* Chat Footer */
@@ -419,6 +488,10 @@ body {
     gap: 1rem;
     align-items: center;
     box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+    /* FIXED: Use relative positioning instead of sticky */
+    position: relative;
+    z-index: 10;
 }
 
 .chat-input {
@@ -434,6 +507,11 @@ body {
     resize: none;
     max-height: 120px;
     min-height: 50px;
+    /* FIXED: Ensure input is accessible on mobile */
+    -webkit-appearance: none;
+appearance: none;
+    /* FIXED: Prevent zoom on iOS */
+    font-size: 16px;
 }
 
 .chat-input:focus {
@@ -460,6 +538,8 @@ body {
     letter-spacing: 1px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     min-width: 100px;
+    /* FIXED: Ensure button is tappable on mobile */
+    min-height: 44px;
 }
 
 .send-button:hover:not(:disabled) {
@@ -486,8 +566,11 @@ body {
     transition: all 0.3s ease;
     outline: none;
     min-width: 150px;
-
-    
+    /* FIXED: Ensure selector is accessible on mobile */
+    -webkit-appearance: none;
+appearance: none;
+    /* FIXED: Prevent zoom on iOS */
+    font-size: 16px;
 }
 
 .model-selector:focus {
@@ -604,6 +687,11 @@ input, button, select, textarea, .session button, .session-creation-message {
     gap: 4px;
     transition: all 0.3s ease;
     border-radius: 4px;
+    /* FIXED: Ensure button is tappable on mobile */
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
 }
 
 .sidebar-toggle-btn:hover {
@@ -639,10 +727,20 @@ input, button, select, textarea, .session button, .session-creation-message {
 
 /* Mobile Responsive Styles */
 @media screen and (max-width: 768px) {
+    /* FIXED: Better mobile body handling */
+    body {
+        /* FIXED: Use 100dvh for better mobile support */
+        min-height: 100dvh;
+    }
+    
     /* Sidebar adjustments for mobile */
     .sidebar {
         width: 280px;
         left: -280px;
+        /* FIXED: Better mobile height handling */
+        height: 100vh;
+        height: 100dvh;
+        max-height: none;
     }
     
     .sidebar-content {
@@ -656,6 +754,10 @@ input, button, select, textarea, .session button, .session-creation-message {
     /* Chat container adjustments */
     .chat-container {
         margin-left: 0;
+        height: 100vh;
+        height: 100dvh;
+        /* FIXED: Ensure proper overflow handling */
+        overflow: hidden;
     }
     
     .chat-container.sidebar-open {
@@ -665,6 +767,8 @@ input, button, select, textarea, .session button, .session-creation-message {
     /* Chat header mobile adjustments */
     .chat-header {
         padding: 1rem;
+        /* FIXED: Add proper mobile header height */
+        min-height: 60px;
     }
     
     .chat-header h1 {
@@ -674,6 +778,8 @@ input, button, select, textarea, .session button, .session-creation-message {
     /* Chat main area mobile adjustments */
     .chat-main {
         padding: 1rem;
+        /* FIXED: Better mobile scroll handling */
+        overflow-x: hidden;
     }
     
     .messages-container {
@@ -687,41 +793,51 @@ input, button, select, textarea, .session button, .session-creation-message {
         font-size: 0.9rem;
     }
     
-    /* Chat footer mobile adjustments */
-    /* Chat footer mobile adjustments - override existing */
-.chat-footer {
-    padding: 1rem;
-    flex-direction: column;
-    gap: 0.75rem;
-}
+    /* FIXED: Chat footer mobile adjustments - completely rewritten */
+    .chat-footer {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.75rem;
+        /* FIXED: Add proper mobile footer height */
+        min-height: auto;
+        /* FIXED: Ensure footer is always visible */
+        position: relative;
+        bottom: 0;
+    }
 
-/* Create input row wrapper only on mobile */
-.chat-input-row {
-    display: flex;
-    gap: 0.75rem;
-    width: 100%;
-}
+    /* Create input row wrapper only on mobile */
+    .chat-input-row {
+        display: flex;
+        gap: 0.75rem;
+        width: 100%;
+        align-items: flex-end;
+    }
 
-/* Adjust input and button within the row on mobile */
-.chat-input-row .chat-input {
-    flex: 1;
-    font-size: 16px;
-    padding: 0.875rem 1rem;
-}
+    /* Adjust input and button within the row on mobile */
+    .chat-input-row .chat-input {
+        flex: 1;
+        /* FIXED: Prevent zoom on mobile */
+        font-size: 16px;
+        padding: 0.875rem 1rem;
+        min-height: 44px;
+    }
 
-.chat-input-row .send-button {
-    width: auto;
-    min-width: 80px;
-    padding: 0.875rem 1.5rem;
-    font-size: 0.9rem;
-}
+    .chat-input-row .send-button {
+        width: auto;
+        min-width: 80px;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
 
-/* Model selector stays full width below */
-.model-selector {
-    width: 100%;
-    padding: 0.875rem;
-    font-size: 16px;
-}
+    /* Model selector stays full width below */
+    .model-selector {
+        width: 100%;
+        padding: 0.875rem;
+        /* FIXED: Prevent zoom on mobile */
+        font-size: 16px;
+        min-height: 44px;
+    }
     
     /* Sidebar overlay for mobile */
     .sidebar.open {
@@ -752,11 +868,13 @@ input, button, select, textarea, .session button, .session-creation-message {
     .session button {
         padding: 0.75rem;
         font-size: 0.85rem;
+        min-height: 44px;
     }
     
     .new-session-btn {
         padding: 0.875rem 1.25rem;
         font-size: 0.9rem;
+        min-height: 44px;
     }
     
     /* Hamburger button adjustments */
@@ -792,6 +910,7 @@ input, button, select, textarea, .session button, .session-creation-message {
     
     .chat-header {
         padding: 0.75rem;
+        min-height: 56px;
     }
     
     .chat-header h1 {
@@ -819,21 +938,47 @@ input, button, select, textarea, .session button, .session-creation-message {
 
 /* Landscape orientation adjustments */
 @media screen and (max-width: 768px) and (orientation: landscape) {
+    /* FIXED: Better landscape handling */
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+    
+    .sidebar {
+        /* FIXED: Adjust sidebar for landscape */
+        height: 100vh;
+        height: 100dvh;
+    }
+    
+    .chat-container {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+    
     .chat-main {
         padding: 0.75rem;
     }
     
     .chat-header {
         padding: 0.75rem 1rem;
+        min-height: 50px;
     }
     
     .chat-footer {
         padding: 0.75rem 1rem;
+        min-height: auto;
+    }
+    
+    /* FIXED: Adjust message sizing for landscape */
+    .message-content {
+        max-width: 80%;
+        font-size: 0.9rem;
     }
 }
 
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
+    /* FIXED: Remove hover transforms on touch devices */
     .session button:hover {
         transform: none;
         background: rgba(51, 65, 85, 0.8);
@@ -841,9 +986,230 @@ input, button, select, textarea, .session button, .session-creation-message {
     
     .send-button:hover:not(:disabled) {
         transform: none;
+        background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
     }
     
     .new-session-btn:hover:not(:disabled) {
         transform: none;
+        background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+    }
+    
+    .sidebar-toggle-btn:hover {
+        background: rgba(71, 85, 105, 0.2);
+    }
+}
+
+/* FIXED: iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    body {
+        /* FIXED: iOS Safari viewport fix */
+        min-height: -webkit-fill-available;
+    }
+    
+    .sidebar {
+        height: -webkit-fill-available;
+        max-height: -webkit-fill-available;
+    }
+    
+    .chat-container {
+        min-height: -webkit-fill-available;
+    }
+}
+
+/* FIXED: Prevent zoom on input focus for iOS */
+@media screen and (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px !important;
+        -webkit-appearance: none;
+appearance: none;
+        -webkit-border-radius: 0;
+        border-radius: 0;
+    }
+    
+    .chat-input {
+        font-size: 16px !important;
+        -webkit-appearance: none;
+appearance: none;
+    }
+    
+    .model-selector {
+        font-size: 16px !important;
+       -webkit-appearance: none;
+appearance: none;
+    }
+}
+
+/* FIXED: Handle notch devices and safe areas */
+@supports (padding: max(0px)) {
+    .sidebar {
+        padding-top: max(env(safe-area-inset-top), 0px);
+        padding-bottom: max(env(safe-area-inset-bottom), 0px);
+        padding-left: max(env(safe-area-inset-left), 0px);
+    }
+    
+    .chat-container {
+        padding-top: max(env(safe-area-inset-top), 0px);
+        padding-bottom: max(env(safe-area-inset-bottom), 0px);
+        padding-right: max(env(safe-area-inset-right), 0px);
+    }
+    
+    .chat-header {
+        padding-top: max(1.5rem, env(safe-area-inset-top) + 1rem);
+    }
+    
+    .chat-footer {
+        padding-bottom: max(1.5rem, env(safe-area-inset-bottom) + 1rem);
+    }
+}
+
+/* FIXED: Prevent content jumping during keyboard appearance on mobile */
+@media screen and (max-width: 768px) {
+    .chat-container {
+        /* FIXED: Prevent viewport changes on keyboard */
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .chat-main {
+        /* FIXED: Maintain scroll position */
+        scroll-behavior: smooth;
+        overscroll-behavior: contain;
+    }
+    
+
+}
+
+/* FIXED: Handle very small screens (iPhone SE, etc.) */
+@media screen and (max-width: 375px) {
+    .sidebar {
+        width: 250px;
+        left: -250px;
+    }
+    
+    .sidebar.open::after {
+        left: 250px;
+    }
+    
+    .sidebar-content {
+        padding: 0.75rem;
+    }
+    
+    .chat-header {
+        padding: 0.5rem;
+        min-height: 50px;
+    }
+    
+    .chat-header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .chat-main {
+        padding: 0.5rem;
+    }
+    
+    .chat-footer {
+        padding: 0.5rem;
+    }
+    
+    .chat-input-row .chat-input {
+        padding: 0.75rem;
+        min-height: 40px;
+    }
+    
+    .chat-input-row .send-button {
+        padding: 0.75rem 1rem;
+        min-height: 40px;
+        font-size: 0.8rem;
+    }
+    
+    .model-selector {
+        padding: 0.75rem;
+        min-height: 40px;
+    }
+    
+    .message-content {
+        max-width: 95%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* FIXED: High DPI display adjustments */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .hamburger-line {
+        /* FIXED: Sharper lines on high DPI */
+        height: 2px;
+    }
+    
+    .sidebar,
+    .chat-header,
+    .chat-footer {
+        /* FIXED: Sharper borders on high DPI */
+        border-width: 0.5px;
+    }
+}
+
+/* FIXED: Prevent text selection issues on mobile */
+@media (hover: none) and (pointer: coarse) {
+    .sidebar-toggle-btn,
+    .send-button,
+    .new-session-btn,
+    .session button {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* FIXED: Dark mode considerations for mobile browsers */
+@media (prefers-color-scheme: dark) {
+    /* Ensure consistent dark theme */
+    body {
+        color-scheme: dark;
+    }
+    
+    .chat-input,
+    .model-selector {
+        color-scheme: dark;
+    }
+}
+
+/* FIXED: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .sidebar {
+        transition: none;
+    }
+    
+    .chat-container {
+        transition: none;
+    }
+}
+
+/* FIXED: Print styles to prevent issues */
+@media print {
+    .sidebar,
+    .sidebar-toggle-btn,
+    .chat-footer {
+        display: none !important;
+    }
+    
+    .chat-container {
+        margin-left: 0 !important;
+    }
+    
+    .message-content {
+        max-width: 100% !important;
+        box-shadow: none !important;
     }
 }

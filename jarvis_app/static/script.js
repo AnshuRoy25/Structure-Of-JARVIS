@@ -520,3 +520,6 @@ function handleResize() {
         toggleBtn.classList.remove('active');
     }
 }
+
+
+
